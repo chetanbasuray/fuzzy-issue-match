@@ -49,7 +49,7 @@ jobs:
       - run: npm audit --omit=dev --audit-level=high
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.NPM_TOKEN != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
       - test
       - security
@@ -73,4 +73,14 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run build
+      - name: Check npm token
+        id: npm_token
+        run: |
+          if [ -n "${NPM_TOKEN}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "NPM_TOKEN not set. Skipping publish."
+          fi
       - run: npx semantic-release
+        if: steps.npm_token.outputs.present == 'true'
