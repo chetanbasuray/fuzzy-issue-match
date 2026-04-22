@@ -82,5 +82,15 @@ jobs:
             echo "present=false" >> "$GITHUB_OUTPUT"
             echo "NPM_TOKEN not set. Skipping publish."
           fi
-      - run: npx semantic-release
+      - name: Verify npm authentication
+        id: npm_auth
         if: steps.npm_token.outputs.present == 'true'
+        run: |
+          if npm whoami --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "NPM_TOKEN is present but invalid for publish. Skipping release."
+          fi
+      - run: npx semantic-release
+        if: steps.npm_token.outputs.present == 'true' && steps.npm_auth.outputs.valid == 'true'
