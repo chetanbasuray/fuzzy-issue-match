@@ -1,0 +1,12 @@
+{
+  "docs": "./docs",
+  "include": [
+    "docs/**/*.md",
+    "README.md",
+    "website/docs/**/*.md"
+  ],
+  "strict": true,
+  "cache": true,
+  "coverageOut": "./coverage/doc-coverage.json",
+  "coverageFormat": "json"
+}

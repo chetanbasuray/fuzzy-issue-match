@@ -17,42 +17,50 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
 ## Quick Start
 
-```ts
-import { createDuplicateIssueMatcher } from "fuzzy-issue-match";
+    import { createDuplicateIssueMatcher } from "fuzzy-issue-match";
 
-const matcher = createDuplicateIssueMatcher({ threshold: 0.4, topK: 5 });
+    const matcher = createDuplicateIssueMatcher({ threshold: 0.4, topK: 5 });
 
-const matches = await matcher.findPossibleDuplicates({
-  newIssue: {
-    title: "Crash on login",
-    body: "App crashes after credentials are entered",
-  },
-  existingIssues: [
-    { number: 42, title: "Crash on login", body: "App crashes when entering credentials" },
-    { number: 7, title: "Feature: dark mode", body: "Please add dark mode" },
-  ],
-});
+    const matches = await matcher.findPossibleDuplicates({
+      newIssue: {
+        title: "Crash on login",
+        body: "App crashes after credentials are entered",
+      },
+      existingIssues: [
+        { number: 42, title: "Crash on login", body: "App crashes when entering credentials" },
+        { number: 7, title: "Feature: dark mode", body: "Please add dark mode" },
+      ],
+    });
 
-console.log(matches);
-// [
-//   { issueNumber: 42, title: "Crash on login", score: 0.94 },
-// ]
-```
+    console.log(matches);
+    // [
+    //   { issueNumber: 42, title: "Crash on login", score: 0.94 },
+    // ]
 
 ## API
 
-### `createDuplicateIssueMatcher(config?)`
+### `createDuplicateIssueMatcher` (config?)
+
+`createDuplicateIssueMatcher(config?: MatcherConfig): Matcher`
 
 Creates a matcher instance. Accepts optional configuration:
 
-| Option         | Default | Description                                |
-|----------------|---------|--------------------------------------------|
-| `threshold`    | `0.3`   | Minimum score (0–1) to consider a match    |
-| `topK`         | `5`     | Max number of candidates to return         |
-| `titleWeight`  | `0.6`   | Weight of title similarity in final score  |
-| `bodyWeight`   | `0.4`   | Weight of body similarity in final score   |
+`interface MatcherConfig { threshold?: number;; topK?: number;; titleWeight?: number;; bodyWeight?: number; }`
 
-### `matcher.findPossibleDuplicates(input)`
+| Option        | Default | Description                                   |
+|---------------|---------|-----------------------------------------------|
+| `threshold`   | `0.3`   | Minimum score, 0 to 1, to consider a match    |
+| `topK`        | `5`     | Maximum number of candidates returned         |
+| `titleWeight` | `0.6`   | Weight of title similarity in final score     |
+| `bodyWeight`  | `0.4`   | Weight of body similarity in final score      |
+
+### `matcher.findPossibleDuplicates` (input)
+
+`interface Matcher { findPossibleDuplicates(input: MatchInput): Promise<DuplicateCandidate[]>; }`
+
+`interface MatchInput { newIssue: { title: string; body: string; };; existingIssues: Array<{ number: number; title: string; body: string; }>; }`
+
+`interface DuplicateCandidate { issueNumber: number;; title: string;; score: number; }`
 
 Takes `{ newIssue: { title, body }, existingIssues: [{ number, title, body }] }`.
 Returns `Array<{ issueNumber, title, score }>` ranked by score descending.
@@ -61,7 +69,7 @@ Returns `Array<{ issueNumber, title, score }>` ranked by score descending.
 
 - **`score`** is a number between `0` and `1`.
 - `1` means the normalized title and body text are identical.
-- `0` means completely different (no shared characters in same order).
+- `0` means completely different with no shared characters in the same order.
 - The final score is a weighted blend: `titleScore * titleWeight + bodyScore * bodyWeight`.
 - Scores below `threshold` are excluded. Remaining candidates are sorted descending and capped at `topK`.
 
@@ -69,10 +77,27 @@ Returns `Array<{ issueNumber, title, score }>` ranked by score descending.
 
 The package also exports:
 
-- `normalizeText(text)` — lowercases, strips punctuation, collapses whitespace
-- `levenshteinDistance(a, b)` — raw edit distance
-- `normalizedLevenshtein(a, b)` — 0–1 similarity score from Levenshtein
-- `weightedFuzzyScore(titleA, titleB, bodyA, bodyB, weights)` — blended score
+`normalizeText(text: string): string`
+
+`levenshteinDistance(a: string, b: string): number`
+
+`normalizedLevenshtein(a: string, b: string): number`
+
+`weightedFuzzyScore(titleA: string, titleB: string, bodyA: string, bodyB: string, weights: { title: number; body: number }): number`
+
+### Internal / Advanced API
+
+These types and factories are exported for advanced composition but not needed for typical usage.
+
+`interface Normalizer { normalize(text: string): string; }`
+
+`interface FuzzyScorer { score(a: string, b: string): number; }`
+
+`interface Ranker { rank(candidates: DuplicateCandidate[]): DuplicateCandidate[]; }`
+
+`createNormalizer(): Normalizer`
+
+`createLevenshteinScorer(): FuzzyScorer`
 
 ## Roadmap
 
