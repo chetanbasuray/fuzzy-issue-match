@@ -70,8 +70,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: https://registry.npmjs.org
-          token: ${{ secrets.NPM_TOKEN }}
       - run: npm ci
       - run: npm run build
       - name: Check npm token
@@ -86,7 +84,12 @@ jobs:
       - name: Verify npm authentication
         id: npm_auth
         if: steps.npm_token.outputs.present == 'true'
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ""
         run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> "$HOME/.npmrc"
           if npm whoami --registry=https://registry.npmjs.org >/dev/null 2>&1; then
             echo "valid=true" >> "$GITHUB_OUTPUT"
           else
