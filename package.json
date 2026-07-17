@@ -48,6 +48,9 @@
   ],
   "license": "MIT",
   "author": "Chetan Basuray",
+  "overrides": {
+    "conventional-commits-filter": "^5.0.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
@@ -57,7 +60,7 @@
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "^26.1.1",
-    "doc-sync-check": "^1.5.0",
+    "doc-sync-check": "^1.6.0",
     "eslint": "^10.3.0",
     "globals": "^17.7.0",
     "semantic-release": "^25.0.5",
