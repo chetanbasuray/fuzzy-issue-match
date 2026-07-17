@@ -59,7 +59,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx doc-sync-check src --include "README.md" --strict
+      - run: npx doc-sync-check src --strict
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
