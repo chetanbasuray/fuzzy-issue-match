@@ -20,6 +20,25 @@ export {
   createLevenshteinScorer,
 } from "./levenshtein.js";
 
+export type {
+  IssueState,
+  IssueMetadata,
+  IssuePage,
+  IssuePageSource,
+  IssueMetadataCache,
+  MemoryCacheOptions,
+  IssueScanOptions,
+  IssueScanMetrics,
+  IssueScanResult,
+  ScanAndMatchResult,
+} from "./scanner.js";
+
+export {
+  createMemoryIssueCache,
+  scanIssuePages,
+  findDuplicatesFromPages,
+} from "./scanner.js";
+
 import type {
   Ranker,
   MatcherConfig,

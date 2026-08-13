@@ -39,6 +39,39 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
 ## API
 
+## Large-repository scanning
+
+Use the paginated scanner when issue metadata does not fit in one request. It
+follows the source's `nextPage`, supports a bounded TTL cache, and reports
+pages fetched, issue count, cache hits, truncation, and elapsed time. A scan is
+O(P + N) for P pages and N issues, with O(N) result memory.
+
+`type IssueState = "open" | "closed"`
+
+`interface IssueMetadata { number: number;; title: string;; body: string; }`
+
+`interface IssuePage { issues: IssueMetadata[];; nextPage?: number; }`
+
+`interface IssuePageSource { list( state: IssueState, page: number, pageSize: number, ): Promise<IssuePage>; }`
+
+`interface IssueMetadataCache { get(key: string): IssueMetadata[] | undefined;; set(key: string, issues: IssueMetadata[]): void;; clear?(): void; }`
+
+`interface MemoryCacheOptions { ttlMs?: number;; maxEntries?: number;; now?: () => number; }`
+
+`interface IssueScanOptions { state?: IssueState;; pageSize?: number;; maxPages?: number;; cache?: IssueMetadataCache;; cacheKey?: string;; now?: () => number; }`
+
+`interface IssueScanMetrics { pagesFetched: number;; issuesFetched: number;; cacheHit: boolean;; truncated: boolean;; durationMs: number; }`
+
+`interface IssueScanResult { issues: IssueMetadata[];; metrics: IssueScanMetrics; }`
+
+`interface ScanAndMatchResult { matches: DuplicateCandidate[];; scan: IssueScanResult; }`
+
+`createMemoryIssueCache(options: MemoryCacheOptions = {}): IssueMetadataCache`
+
+`scanIssuePages(source: IssuePageSource, options: IssueScanOptions = {}): Promise<IssueScanResult>`
+
+`findDuplicatesFromPages(matcher: Matcher, input: Omit<MatchInput, "existingIssues">, source: IssuePageSource, options: IssueScanOptions = {}): Promise<ScanAndMatchResult>`
+
 ### `createDuplicateIssueMatcher` (config?)
 
 `createDuplicateIssueMatcher(config?: MatcherConfig): Matcher`
