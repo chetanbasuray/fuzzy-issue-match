@@ -5,6 +5,8 @@ import {
   normalizedLevenshtein,
   weightedFuzzyScore,
   normalizeText,
+  createTokenJaccardProvider,
+  tokenJaccardScore,
 } from "../src/index.js";
 
 describe("normalizeText", () => {
@@ -120,6 +122,25 @@ describe("weightedFuzzyScore", () => {
   });
 });
 
+describe("tokenJaccardScore", () => {
+  it("matches reordered tokens and ignores punctuation", () => {
+    expect(tokenJaccardScore("Login crash startup", "startup: login crash")).toBe(1);
+  });
+
+  it("returns partial similarity for paraphrased text", () => {
+    const score = tokenJaccardScore(
+      "The app crashes when I sign in",
+      "The application fails during login",
+    );
+    expect(score).toBeGreaterThan(0);
+    expect(score).toBeLessThan(1);
+  });
+
+  it("is exposed as a provider", () => {
+    expect(createTokenJaccardProvider().score("same text", "same text")).toBe(1);
+  });
+});
+
 describe("createDuplicateIssueMatcher", () => {
   it("returns empty array when no existing issues provided", async () => {
     const matcher = createDuplicateIssueMatcher();
@@ -213,5 +234,29 @@ describe("createDuplicateIssueMatcher", () => {
       title: "Bug: app crashes",
       score: 1,
     });
+  });
+
+  it("fuses a custom semantic provider with fuzzy scoring", async () => {
+    const provider = {
+      score: async () => 0.9,
+    };
+    const matcher = createDuplicateIssueMatcher({
+      semanticProvider: provider,
+      fuzzyWeight: 0,
+      semanticWeight: 1,
+    });
+
+    const result = await matcher.findPossibleDuplicates({
+      newIssue: { title: "new", body: "text" },
+      existingIssues: [{ number: 7, title: "unrelated", body: "content" }],
+    });
+
+    expect(result[0].score).toBe(0.9);
+  });
+
+  it("rejects a zero total similarity weight", () => {
+    expect(() =>
+      createDuplicateIssueMatcher({ fuzzyWeight: 0, semanticWeight: 0 }),
+    ).toThrow("not both zero");
   });
 });
