@@ -34,7 +34,7 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
     console.log(matches);
     // [
-    //   { issueNumber: 42, title: "Crash on login", score: 0.94 },
+    //   { issueNumber: 42, title: "Crash on login", score: 0.94, confidence: 94 },
     // ]
 
 ## API
@@ -60,18 +60,26 @@ Creates a matcher instance. Accepts optional configuration:
 
 `interface MatchInput { newIssue: { title: string; body: string; };; existingIssues: Array<{ number: number; title: string; body: string; }>; }`
 
-`interface DuplicateCandidate { issueNumber: number;; title: string;; score: number; }`
+`interface DuplicateCandidate { issueNumber: number;; title: string;; score: number;; confidence: number; }`
 
 Takes `{ newIssue: { title, body }, existingIssues: [{ number, title, body }] }`.
-Returns `Array<{ issueNumber, title, score }>` ranked by score descending.
+Returns `Array<{ issueNumber, title, score, confidence }>` ranked by score descending.
 
 ### Score Semantics
 
 - **`score`** is a number between `0` and `1`.
 - `1` means the normalized title and body text are identical.
 - `0` means completely different with no shared characters in the same order.
+- **`confidence`** is a rounded percentage from `0` to `100`, calculated by
+  clamping the normalized score to its valid range before conversion. This is a
+  calibrated similarity indicator, not a statistical probability.
 - The final score is a weighted blend: `titleScore * titleWeight + bodyScore * bodyWeight`.
-- Scores below `threshold` are excluded. Remaining candidates are sorted descending and capped at `topK`.
+- Scores below `threshold` are excluded. Remaining candidates are sorted by
+  score descending, then issue number ascending for deterministic ties, and
+  capped at `topK`.
+
+The exported confidence-calibration utility exposes the same linear conversion
+used by the matcher for integrations that need to display confidence values.
 
 ### Low-Level Utilities
 
@@ -84,6 +92,8 @@ The package also exports:
 `normalizedLevenshtein(a: string, b: string): number`
 
 `weightedFuzzyScore(titleA: string, titleB: string, bodyA: string, bodyB: string, weights: { title: number; body: number }): number`
+
+`calibrateConfidence(score: number): number`
 
 ### Internal / Advanced API
 
