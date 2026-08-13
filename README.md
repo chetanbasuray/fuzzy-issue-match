@@ -13,7 +13,7 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
 ## Status
 
-`v1.0.0` ships the core duplicate-detection engine using Levenshtein distance scoring with configurable thresholds, weighted title/body blending, and a ranked pipeline.
+`v1.0.0` ships the core duplicate-detection engine using blended Levenshtein and token-similarity scoring with configurable thresholds, weighted title/body blending, and a ranked pipeline.
 
 ## Quick Start
 
@@ -45,7 +45,7 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
 Creates a matcher instance. Accepts optional configuration:
 
-`interface MatcherConfig { threshold?: number;; topK?: number;; titleWeight?: number;; bodyWeight?: number; }`
+`interface MatcherConfig { threshold?: number;; topK?: number;; titleWeight?: number;; bodyWeight?: number;; semanticProvider?: SemanticSimilarityProvider;; semanticWeight?: number;; fuzzyWeight?: number; }`
 
 | Option        | Default | Description                                   |
 |---------------|---------|-----------------------------------------------|
@@ -53,6 +53,9 @@ Creates a matcher instance. Accepts optional configuration:
 | `topK`        | `5`     | Maximum number of candidates returned         |
 | `titleWeight` | `0.6`   | Weight of title similarity in final score     |
 | `bodyWeight`  | `0.4`   | Weight of body similarity in final score      |
+| `fuzzyWeight` | `0.8`   | Relative weight of the edit-distance score    |
+| `semanticWeight` | `0.2` | Relative weight of the semantic provider      |
+| `semanticProvider` | token/Jaccard | Provider for paraphrase similarity; replace with an embedding adapter |
 
 ### `matcher.findPossibleDuplicates` (input)
 
@@ -70,7 +73,9 @@ Returns `Array<{ issueNumber, title, score }>` ranked by score descending.
 - **`score`** is a number between `0` and `1`.
 - `1` means the normalized title and body text are identical.
 - `0` means completely different with no shared characters in the same order.
-- The final score is a weighted blend: `titleScore * titleWeight + bodyScore * bodyWeight`.
+- The fuzzy component is `titleScore * titleWeight + bodyScore * bodyWeight`.
+- The final score normalizes `fuzzyScore * fuzzyWeight + semanticScore * semanticWeight` by the sum of the two similarity weights.
+- The default semantic provider compares normalized token sets with Jaccard similarity. It is deterministic and dependency-free, and can be replaced by an embedding-backed `SemanticSimilarityProvider`.
 - Scores below `threshold` are excluded. Remaining candidates are sorted descending and capped at `topK`.
 
 ### Low-Level Utilities
@@ -85,6 +90,8 @@ The package also exports:
 
 `weightedFuzzyScore(titleA: string, titleB: string, bodyA: string, bodyB: string, weights: { title: number; body: number }): number`
 
+`tokenJaccardScore(a: string, b: string): number`
+
 ### Internal / Advanced API
 
 These types and factories are exported for advanced composition but not needed for typical usage.
@@ -93,11 +100,15 @@ These types and factories are exported for advanced composition but not needed f
 
 `interface FuzzyScorer { score(a: string, b: string): number; }`
 
+`interface SemanticSimilarityProvider { score(a: string, b: string): number | Promise<number>; }`
+
 `interface Ranker { rank(candidates: DuplicateCandidate[]): DuplicateCandidate[]; }`
 
 `createNormalizer(): Normalizer`
 
 `createLevenshteinScorer(): FuzzyScorer`
+
+`createTokenJaccardProvider(): SemanticSimilarityProvider`
 
 ## Roadmap
 
