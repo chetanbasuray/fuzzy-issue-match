@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "pairs": [
+    {
+      "id": "login-crash-exact",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Crash on login",
+        "body": "The app crashes after valid credentials are submitted."
+      },
+      "existingIssue": {
+        "title": "Crash on login",
+        "body": "The app crashes after valid credentials are submitted."
+      }
+    },
+    {
+      "id": "login-crash-paraphrase",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Login form crashes after sign in",
+        "body": "Submitting correct credentials closes the application unexpectedly."
+      },
+      "existingIssue": {
+        "title": "Crash on login",
+        "body": "The app exits unexpectedly when the user submits valid credentials."
+      }
+    },
+    {
+      "id": "dark-mode-request",
+      "label": "distinct",
+      "newIssue": {
+        "title": "Request for dark mode",
+        "body": "Please add a dark theme to the settings screen."
+      },
+      "existingIssue": {
+        "title": "Crash on login",
+        "body": "The app crashes after valid credentials are submitted."
+      }
+    },
+    {
+      "id": "export-timeout-exact",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "CSV export times out",
+        "body": "Large exports never finish and eventually return a timeout."
+      },
+      "existingIssue": {
+        "title": "CSV export times out",
+        "body": "Large exports never finish and eventually return a timeout."
+      }
+    },
+    {
+      "id": "export-timeout-paraphrase",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Export hangs for big datasets",
+        "body": "Downloading a large CSV remains pending until the request expires."
+      },
+      "existingIssue": {
+        "title": "CSV export times out",
+        "body": "Large exports never finish and eventually return a timeout."
+      }
+    },
+    {
+      "id": "webhook-delivery",
+      "label": "distinct",
+      "newIssue": {
+        "title": "Webhook delivery retries",
+        "body": "The integration should retry failed webhook deliveries."
+      },
+      "existingIssue": {
+        "title": "CSV export times out",
+        "body": "Large exports never finish and eventually return a timeout."
+      }
+    },
+    {
+      "id": "mobile-sync-exact",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Mobile sync is stuck",
+        "body": "The mobile client remains stuck while synchronizing records."
+      },
+      "existingIssue": {
+        "title": "Mobile sync is stuck",
+        "body": "The mobile client remains stuck while synchronizing records."
+      }
+    },
+    {
+      "id": "mobile-sync-paraphrase",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Phone data never finishes syncing",
+        "body": "Records stay in the pending state on the mobile application."
+      },
+      "existingIssue": {
+        "title": "Mobile sync is stuck",
+        "body": "The mobile client remains stuck while synchronizing records."
+      }
+    },
+    {
+      "id": "search-filter",
+      "label": "distinct",
+      "newIssue": {
+        "title": "Add filters to search",
+        "body": "Search results should be filterable by project and owner."
+      },
+      "existingIssue": {
+        "title": "Mobile sync is stuck",
+        "body": "The mobile client remains stuck while synchronizing records."
+      }
+    },
+    {
+      "id": "permissions-denied-exact",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Permission denied when saving",
+        "body": "Saving a document fails with a permission denied error."
+      },
+      "existingIssue": {
+        "title": "Permission denied when saving",
+        "body": "Saving a document fails with a permission denied error."
+      }
+    },
+    {
+      "id": "permissions-denied-distinct",
+      "label": "distinct",
+      "newIssue": {
+        "title": "Improve permission editor",
+        "body": "The admin panel needs a clearer role assignment interface."
+      },
+      "existingIssue": {
+        "title": "Permission denied when saving",
+        "body": "Saving a document fails with a permission denied error."
+      }
+    },
+    {
+      "id": "notifications-exact",
+      "label": "duplicate",
+      "newIssue": {
+        "title": "Notifications are delayed",
+        "body": "Push notifications arrive several minutes after the event."
+      },
+      "existingIssue": {
+        "title": "Notifications are delayed",
+        "body": "Push notifications arrive several minutes after the event."
+      }
+    }
+  ]
+}

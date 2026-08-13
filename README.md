@@ -37,6 +37,36 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
     //   { issueNumber: 42, title: "Crash on login", score: 0.94 },
     // ]
 
+## Benchmarking
+
+The repository includes a labeled issue-pair dataset and a repeatable
+precision/recall/F1 harness. Run it locally with:
+
+```bash
+npm run benchmark -- --dataset benchmark/dataset.json --thresholds 0.3,0.5,0.7
+```
+
+Each pair has a `duplicate` or `distinct` label. The command reports the
+confusion matrix and metrics for every threshold. `benchmark/baseline.json`
+stores the committed baseline, and the benchmark workflow runs the same
+command with `--check-baseline` as a CI smoke test.
+
+`runBenchmark(dataset: BenchmarkDataset, thresholds: number[]): BenchmarkReport`
+
+`formatBenchmarkReport(report: BenchmarkReport): string`
+
+`type BenchmarkLabel = "duplicate" | "distinct"`
+
+`interface BenchmarkIssue { title: string;; body: string; }`
+
+`interface BenchmarkPair { id: string;; label: BenchmarkLabel;; newIssue: BenchmarkIssue;; existingIssue: BenchmarkIssue; }`
+
+`interface BenchmarkDataset { version: number;; pairs: BenchmarkPair[]; }`
+
+`interface BenchmarkMetrics { threshold: number;; truePositives: number;; falsePositives: number;; trueNegatives: number;; falseNegatives: number;; precision: number;; recall: number;; f1: number; }`
+
+`interface BenchmarkReport { datasetVersion: number;; pairCount: number;; metrics: BenchmarkMetrics[]; }`
+
 ## API
 
 ### `createDuplicateIssueMatcher` (config?)
