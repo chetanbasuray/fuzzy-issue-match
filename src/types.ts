@@ -21,6 +21,8 @@ export interface DuplicateCandidate {
   issueNumber: number;
   title: string;
   score: number;
+  /** Interpretable percentage derived from `score`, in the range 0..100. */
+  confidence: number;
 }
 
 export interface MatchInput {

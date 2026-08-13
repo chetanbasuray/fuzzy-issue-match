@@ -1,11 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
+  calibrateConfidence,
   createDuplicateIssueMatcher,
   levenshteinDistance,
   normalizedLevenshtein,
   weightedFuzzyScore,
   normalizeText,
 } from "../src/index.js";
+
+describe("calibrateConfidence", () => {
+  it("converts normalized scores to rounded percentages", () => {
+    expect(calibrateConfidence(0.876)).toBe(88);
+    expect(calibrateConfidence(1)).toBe(100);
+  });
+
+  it("clamps invalid score boundaries", () => {
+    expect(calibrateConfidence(-0.2)).toBe(0);
+    expect(calibrateConfidence(1.2)).toBe(100);
+    expect(calibrateConfidence(Number.NaN)).toBe(0);
+  });
+});
 
 describe("normalizeText", () => {
   it("lowercases and trims", () => {
@@ -212,6 +226,23 @@ describe("createDuplicateIssueMatcher", () => {
       issueNumber: 42,
       title: "Bug: app crashes",
       score: 1,
+      confidence: 100,
     });
+  });
+
+  it("orders tied scores by issue number for stable ranking", async () => {
+    const matcher = createDuplicateIssueMatcher({ threshold: 0, topK: 3 });
+    const result = await matcher.findPossibleDuplicates({
+      newIssue: { title: "same", body: "same" },
+      existingIssues: [
+        { number: 9, title: "same", body: "same" },
+        { number: 2, title: "same", body: "same" },
+        { number: 4, title: "same", body: "same" },
+        { number: 1, title: "different", body: "different" },
+      ],
+    });
+
+    expect(result.map((candidate) => candidate.issueNumber)).toEqual([2, 4, 9]);
+    expect(result.every((candidate) => candidate.confidence === 100)).toBe(true);
   });
 });

@@ -36,11 +36,25 @@ const DEFAULTS: Required<MatcherConfig> = {
   bodyWeight: 0.4,
 };
 
+/**
+ * Convert a normalized similarity score into a readable percentage.
+ *
+ * Scores are clamped before conversion so callers can safely use this helper
+ * with custom rankers that produce a small amount of numeric drift.
+ */
+export function calibrateConfidence(score: number): number {
+  if (!Number.isFinite(score)) {
+    return 0;
+  }
+
+  return Math.round(Math.min(1, Math.max(0, score)) * 100);
+}
+
 function createRanker(config: Required<MatcherConfig>): Ranker {
   return {
     rank(candidates: DuplicateCandidate[]): DuplicateCandidate[] {
       const filtered = candidates.filter((c) => c.score >= config.threshold);
-      filtered.sort((a, b) => b.score - a.score);
+      filtered.sort((a, b) => b.score - a.score || a.issueNumber - b.issueNumber);
       return filtered.slice(0, config.topK);
     },
   };
@@ -71,6 +85,7 @@ export function createDuplicateIssueMatcher(
           issueNumber: existing.number,
           title: existing.title,
           score,
+          confidence: calibrateConfidence(score),
         });
       }
 
