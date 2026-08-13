@@ -1,0 +1,28 @@
+name: Fuzzy issue duplicate check
+description: Comment on newly opened issues that look like existing issues.
+author: fuzzy-issue-match contributors
+
+inputs:
+  token:
+    description: GitHub token with permission to read issues and create comments.
+    required: true
+  threshold:
+    description: Minimum similarity score from 0 to 1.
+    required: false
+    default: "0.3"
+  max-candidates:
+    description: Maximum number of duplicate candidates to include in the comment.
+    required: false
+    default: "5"
+  include-closed:
+    description: Also compare against closed issues.
+    required: false
+    default: "true"
+
+runs:
+  using: node20
+  main: dist/action.js
+
+branding:
+  icon: copy
+  color: purple
