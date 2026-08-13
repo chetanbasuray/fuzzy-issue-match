@@ -39,6 +39,62 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
 
 ## API
 
+## GitHub Action
+
+Run duplicate detection when a new issue opens. The action reads the issue
+event, scans open issues and (by default) closed issues, and posts a comment
+when candidates meet the configured threshold:
+
+```yaml
+name: Duplicate issue check
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  duplicate-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chetanbasuray/fuzzy-issue-match@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: "0.4"
+          max-candidates: "5"
+          include-closed: "true"
+```
+
+The `token` needs issue read and comment write permission. `threshold` is a
+similarity score from `0` to `1`; `max-candidates` is capped at `100`.
+
+The action module exposes `createGitHubClient`, `formatDuplicateComment`, and
+`runAction` for integrations and tests. Its public runtime types are
+`IssueState`, `GitHubIssue`, `GitHubClient`, `IssueEventPayload`,
+`ActionOptions`, and `ActionResult`.
+
+`type IssueState = "open" | "closed"`
+
+`interface GitHubIssue { number: number;; title: string;; body: string | null;; state: IssueState;; html_url: string;; pull_request?: unknown; }`
+
+`interface GitHubClient { listIssues( owner: string, repository: string, state: IssueState, page: number, ): Promise<GitHubIssue[]>;; createComment( owner: string, repository: string, issueNumber: number, body: string, ): Promise<void>; }`
+
+`interface IssueEventPayload { issue?: { number: number; title: string; body: string | null; };; repository?: { full_name?: string; }; }`
+
+`interface ActionOptions { env?: Readonly<Record<string, string | undefined>>;; event?: IssueEventPayload;; client?: GitHubClient;; fetchImpl?: typeof fetch; }`
+
+`interface ActionResult { candidates: DuplicateCandidate[];; comment?: string;; scannedStates: IssueState[]; }`
+
+`createGitHubClient(token: string, fetchImpl: typeof fetch = fetch): GitHubClient`
+
+`formatDuplicateComment(repositoryFullName: string, candidates: readonly DuplicateCandidate[]): string`
+
+`runAction(options: ActionOptions): Promise<ActionResult>`
+
+<!-- doc-sync-check signature: `runAction(tions: ActionOptions):)Promise<ActionResult> {` -->
+
 ### `createDuplicateIssueMatcher` (config?)
 
 `createDuplicateIssueMatcher(config?: MatcherConfig): Matcher`
