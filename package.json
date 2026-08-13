@@ -22,6 +22,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "benchmark": "npm run build && node dist/benchmark.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "release": "semantic-release"
   },
