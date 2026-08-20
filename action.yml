@@ -1,0 +1,46 @@
+name: "Fuzzy Issue Duplicate Check"
+description: "Detects likely duplicate GitHub issues using fuzzy matching and comments with candidates."
+author: "Chetan Basuray"
+inputs:
+  threshold:
+    description: "Minimum similarity score (0-1) for a candidate to be flagged as a possible duplicate."
+    required: false
+    default: "0.6"
+  max-candidates:
+    description: "Maximum number of duplicate candidates to include in the comment."
+    required: false
+    default: "5"
+  github-token:
+    description: "Token used to query and comment on issues."
+    required: false
+    default: ${{ github.token }}
+outputs:
+  duplicate-count:
+    description: "Number of likely duplicate candidates found."
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 20
+    - name: Install action dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm ci
+    - name: Build action
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm run build
+    - name: Run duplicate check
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: node dist/action.js
+      env:
+        INPUT_THRESHOLD: ${{ inputs.threshold }}
+        INPUT_MAX-CANDIDATES: ${{ inputs.max-candidates }}
+        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+branding:
+  icon: "copy"
+  color: "blue"
