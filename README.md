@@ -37,6 +37,33 @@ Detect potential duplicate GitHub issues before maintainers spend hours triaging
     //   { issueNumber: 42, title: "Crash on login", score: 0.94 },
     // ]
 
+## GitHub Action
+
+Run duplicate detection on every newly opened issue and get a comment with likely matches.
+
+    name: Duplicate issue check
+    on:
+      issues:
+        types: [opened]
+    jobs:
+      check:
+        runs-on: ubuntu-latest
+        permissions:
+          issues: write
+        steps:
+          - uses: chetanbasuray/fuzzy-issue-match@main
+            with:
+              threshold: "0.6"
+              max-candidates: "5"
+
+| Input            | Default             | Description                                              |
+|-------------------|---------------------|------------------------------------------------------------|
+| `threshold`       | `0.6`               | Minimum score, 0 to 1, for a candidate to be flagged      |
+| `max-candidates`  | `5`                 | Maximum number of candidates included in the comment     |
+| `github-token`    | `${{ github.token }}` | Token used to list issues and post the comment          |
+
+Output: `duplicate-count`, the number of likely duplicate candidates found.
+
 ## API
 
 ### `createDuplicateIssueMatcher` (config?)
