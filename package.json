@@ -49,7 +49,8 @@
   "license": "MIT",
   "author": "Chetan Basuray",
   "overrides": {
-    "conventional-commits-filter": "^5.0.0"
+    "conventional-changelog-writer": "^9.0.0",
+    "conventional-commits-filter": "^6.0.1"
   },
   "dependencies": {
     "@actions/core": "^3.0.1",
