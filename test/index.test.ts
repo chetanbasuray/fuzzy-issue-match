@@ -118,6 +118,17 @@ describe("weightedFuzzyScore", () => {
     );
     expect(highBody).toBe(1);
   });
+
+  it("clamps the score to 1 when weights sum above 1", () => {
+    const score = weightedFuzzyScore(
+      "Crash on login",
+      "Crash on login",
+      "App crashes when entering credentials",
+      "App crashes when entering credentials",
+      { title: 1, body: 1 },
+    );
+    expect(score).toBe(1);
+  });
 });
 
 describe("createDuplicateIssueMatcher", () => {

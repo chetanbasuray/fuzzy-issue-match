@@ -57,7 +57,8 @@ export function weightedFuzzyScore(
     normalizeText(bodyB),
   );
 
-  return titleScore * weights.title + bodyScore * weights.body;
+  const score = titleScore * weights.title + bodyScore * weights.body;
+  return Math.min(1, Math.max(0, score));
 }
 
 export function createLevenshteinScorer(): FuzzyScorer {
