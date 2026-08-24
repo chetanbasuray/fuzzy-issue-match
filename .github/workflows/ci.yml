@@ -74,7 +74,6 @@ jobs:
       id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -85,29 +84,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Check npm token
-        id: npm_token
-        run: |
-          if [ -n "${NPM_TOKEN}" ]; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "NPM_TOKEN not set. Skipping publish."
-          fi
-      - name: Verify npm authentication
-        id: npm_auth
-        if: steps.npm_token.outputs.present == 'true'
-        shell: bash
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_USERCONFIG: ""
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> "$HOME/.npmrc"
-          if npm whoami --registry=https://registry.npmjs.org >/dev/null 2>&1; then
-            echo "valid=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "valid=false" >> "$GITHUB_OUTPUT"
-            echo "NPM_TOKEN is present but invalid for publish. Skipping release."
-          fi
       - run: npx semantic-release
-        if: steps.npm_token.outputs.present == 'true' && steps.npm_auth.outputs.valid == 'true'
